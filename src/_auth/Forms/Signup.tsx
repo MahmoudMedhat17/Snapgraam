@@ -26,7 +26,7 @@ const Signup = () => {
   const { mutateAsync: createNewUserAccount, isPending } =
     useCreateNewUserAccount();
   const { mutateAsync: signInAccount } = useSignInAccount();
-  const { isLoading: isUserLoading, checkUserAuth } = useUserContext();
+  const { checkUserAuth } = useUserContext();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof SignupValidation>>({
@@ -41,41 +41,45 @@ const Signup = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(users: z.infer<typeof SignupValidation>) {
-    const newUser = await createNewUserAccount(users);
+    try {
+      const newUser = await createNewUserAccount(users);
 
-    // If user not found, show a toast with title
-    if (!newUser) {
-      return toast({
-        variant: "destructive",
-        title: "Sign up failed, please try again",
+      // If user not found, show a toast with title
+      if (!newUser) {
+        return toast({
+          title: "Sign up failed, please try again",
+        });
+      }
+
+      const session = await signInAccount({
+        email: users.email,
+        password: users.password,
       });
+
+      // If session not found, show a toast with title
+      if (!session) {
+        toast({
+          title: "Sign in failed, please try again",
+        });
+        navigate("/signin");
+      }
+
+      const isLogged = await checkUserAuth();
+
+      if (isLogged) {
+        navigate("/");
+      } else {
+        return toast({
+          variant: "destructive",
+          title: "Sign in failed, please try again",
+        });
+      }
+
+      console.log(newUser);
+    } catch (error) {
+      console.log(error);
     }
-
-    const session = await signInAccount({
-      email: users.email,
-      password: users.password,
-    });
-
-    // If session not found, show a toast with title
-    if (!session) {
-      return toast({
-        title: "Sign in failed, please try again",
-      });
-    }
-
-    const isLogged = await checkUserAuth();
-
-    if (isLogged) {
-      navigate("/home");
-    } else {
-      return toast({
-        variant: "destructive",
-        title: "Sign in failed, please try again",
-      });
-    };
-
-    console.log(newUser);
-  };
+  }
 
   return (
     <Form {...form}>
@@ -95,7 +99,7 @@ const Signup = () => {
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel className="shad-form_label">Name</FormLabel>
                 <FormControl>
                   <Input
@@ -112,7 +116,7 @@ const Signup = () => {
             control={form.control}
             name="username"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel className="shad-form_label">Username</FormLabel>
                 <FormControl>
                   <Input
@@ -129,7 +133,7 @@ const Signup = () => {
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel className="shad-form_label">Email</FormLabel>
                 <FormControl>
                   <Input
@@ -146,7 +150,7 @@ const Signup = () => {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel className="shad-form_label">Password</FormLabel>
                 <FormControl>
                   <Input
@@ -161,7 +165,7 @@ const Signup = () => {
           />
           <Button
             type="submit"
-            className="shad-button_primary w-full rounded-[8px]"
+            className="shad-button_primary flex justify-center items-center w-full rounded-[8px]"
           >
             {isPending ? (
               <div className="flex-center gap-2">

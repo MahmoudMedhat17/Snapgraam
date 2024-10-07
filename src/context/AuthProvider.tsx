@@ -1,4 +1,4 @@
-import { IcontextType } from "@/types";
+import { IcontextType, Iuser } from "@/types";
 import {
   useContext,
   useState,
@@ -30,7 +30,7 @@ export const INITIAL_STATE = {
 const AuthContext = createContext<IcontextType>(INITIAL_STATE);
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState(INITIAL_USER);
+  const [user, setUser] = useState<Iuser>(INITIAL_USER);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();

@@ -7,7 +7,7 @@ export interface InewUser {
 
 
 export interface IsaveUserToDB {
-    accoundId: string;
+    accountId: string;
     name: string;
     email: string;
     imageUrl: URL;
@@ -38,4 +38,12 @@ export interface IcontextType {
     setUser: React.Dispatch<React.SetStateAction<Iuser>>,
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>,
     checkUserAuth: () => Promise<boolean>,
+};
+
+export interface InewPost {
+    userId: string;
+    caption: string;
+    file: File[];
+    location: string;
+    tags: string;
 };

@@ -1,6 +1,6 @@
-import { InewUser, IsaveUserToDB, IsignInAccount } from "@/types"
-import { account, databases, avatars } from "./config";
-import { ID, Query } from "appwrite";
+import { InewPost, InewUser, IsaveUserToDB, IsignInAccount } from "@/types"
+import { account, databases, avatars, storage } from "./config";
+import { ID, ImageGravity, Query } from "appwrite";
 import { appwriteConfig } from "./config";
 
 
@@ -22,7 +22,7 @@ export const createNewUserAccount = async (user: InewUser) => {
         const avatarUrl = avatars.getInitials(user.name);
 
         const newUser = await saveUserToDB({
-            accoundId: newAccount.$id,
+            accountId: newAccount.$id,
             name: newAccount.name,
             email: newAccount.email,
             imageUrl: avatarUrl,
@@ -49,7 +49,6 @@ export const saveUserToDB = async (user: IsaveUserToDB) => {
         return newUser;
     } catch (error) {
         console.log(error);
-        return error;
     };
 };
 
@@ -62,7 +61,19 @@ export const signInAccount = async (user: IsignInAccount) => {
     } catch (error) {
         console.log(error);
         return error;
-    }
+    };
+};
+
+
+//Function to remove the current session
+export const signOutAccount = async () => {
+    try {
+        const session = await account.deleteSession("current");
+        return session;
+    } catch (error) {
+        console.log(error);
+        return error;
+    };
 };
 
 
@@ -70,11 +81,10 @@ export const signInAccount = async (user: IsignInAccount) => {
 export const getAccount = async () => {
     try {
         const currentAccount = await account.get();
-
         return currentAccount;
     } catch (error) {
         console.log(error);
-    }
+    };
 };
 
 
@@ -88,12 +98,103 @@ export const getCurrentUser = async () => {
         const currentUser = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
-            [Query.equal("accountId", currentAccount?.$id)]
+            [Query.equal("accountId", currentAccount.$id)]
         );
+
+        if (!currentUser) throw Error;
 
         return currentUser.documents[0];
     } catch (error) {
         console.log(error);
         return null;
+    };
+};
+
+
+
+// POSTS
+
+//Function to create a post and save it to appwrite
+export const createPost = async (post: InewPost) => {
+    try {
+        // Upload file to appwrite storage
+        const uploadedFile = await uploadedFileFunc(post.file[0]);
+        if (!uploadedFile) throw Error;
+
+        // Get file url
+        const fileUrl = await getFilePreviewFunc(uploadedFile.$id);
+        if (!fileUrl) throw Error;
+
+        // Convert tags into array
+        const tags = post.tags.replace(/ /g, "").split(",") || [];
+
+        // Create post
+        const newPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            ID.unique(),
+            {
+                creator: post.userId,
+                caption: post.caption,
+                location: post.location,
+                imageId: uploadedFile.$id,
+                imageUrl: fileUrl,
+                tags: tags
+            }
+        );
+        if (!newPost) {
+            await deleteFile(uploadedFile.$id);
+            throw Error;
+        };
+        return newPost;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+//Function to upload the file appwrite storage
+export const uploadedFileFunc = async (file: File) => {
+    try {
+        const uploadedFile = await storage.createFile(
+            appwriteConfig.storageId,
+            ID.unique(),
+            file,
+        );
+        return uploadedFile;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+//Function to get the file url
+export const getFilePreviewFunc =  (fileId: string) => {
+    try {
+        const fileUrl = storage.getFilePreview(
+            appwriteConfig.storageId,
+            fileId,
+            2000,
+            2000,
+            ImageGravity.Top,
+            100
+        );
+        if (!fileUrl) throw Error;
+        return fileUrl;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+//Function to delete the file
+export const deleteFile = (fileId: string) => {
+    try {
+        const deleteFileUrl = storage.deleteFile(
+            appwriteConfig.storageId,
+            fileId
+        );
+        return deleteFileUrl;
+    } catch (error) {
+        console.log(error);
     }
 };

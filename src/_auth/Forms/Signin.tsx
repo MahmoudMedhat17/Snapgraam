@@ -12,11 +12,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SigninValidation } from "@/lib/validation";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loader from "@/components/shared/Loader";
+import { useSignInAccount } from "@/lib/react-query/queriesAndMutations";
+import { useUserContext } from "@/context/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
 
 const Signin = () => {
-  const isLoading = true;
+  const { toast } = useToast();
+  const { mutateAsync: signInAccount } = useSignInAccount();
+  const { isLoading, checkUserAuth } = useUserContext();
+  const navigate = useNavigate();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SigninValidation>>({
@@ -28,10 +34,28 @@ const Signin = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof SigninValidation>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(users: z.infer<typeof SigninValidation>) {
+    try {
+      const session = await signInAccount({
+        email: users.email,
+        password: users.password,
+      });
+      if (!session) {
+        toast({ title: "Login failed, please try again" });
+      }
+
+      const isLogged = await checkUserAuth();
+      if (!isLogged) {
+        toast({ title: "Login failed, please try again" });
+      } else {
+        navigate("/");
+        form.reset();
+      }
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+    console.log(users);
   }
 
   return (
@@ -58,6 +82,7 @@ const Signin = () => {
                   <Input
                     className="shad-input rounded-[8px]"
                     placeholder="Email"
+                    type="email"
                     {...field}
                   />
                 </FormControl>
@@ -75,6 +100,7 @@ const Signin = () => {
                   <Input
                     className="shad-input rounded-[8px]"
                     placeholder="Password"
+                    type="password"
                     {...field}
                   />
                 </FormControl>
@@ -82,7 +108,10 @@ const Signin = () => {
               </FormItem>
             )}
           />
-          <Button className="shad-button_primary rounded-[8px]" type="submit">
+          <Button
+            className="shad-button_primary flex justify-center items-center rounded-[8px]"
+            type="submit"
+          >
             {isLoading ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading...
