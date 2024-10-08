@@ -12,12 +12,25 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import FileUploader from "../shared/FileUploader";
-import { FileUploaderValidation } from "@/lib/validation";
+import { PostValidation } from "@/lib/validation";
+import { useCreatePost } from "@/lib/react-query/queriesAndMutations";
+import { useUserContext } from "@/context/AuthProvider";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
+import { Models } from "appwrite";
 
-const PostForm = ({ post }) => {
+interface PostFormProps {
+  post?: Models.Document;
+}
+
+const PostForm = ({ post }: PostFormProps) => {
+  const { mutateAsync: createPost } = useCreatePost();
+  const { user } = useUserContext();
+  const navigate = useNavigate();
+
   // 1. Define your form.
-  const form = useForm<z.infer<typeof FileUploaderValidation>>({
-    resolver: zodResolver(FileUploaderValidation),
+  const form = useForm<z.infer<typeof PostValidation>>({
+    resolver: zodResolver(PostValidation),
     defaultValues: {
       caption: post ? post?.caption : "",
       file: [],
@@ -27,7 +40,19 @@ const PostForm = ({ post }) => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof FileUploaderValidation>) {
+  async function onSubmit(values: z.infer<typeof PostValidation>) {
+    const newPost = await createPost({
+      ...values,
+      userId: user.id,
+    });
+
+    if (!newPost) {
+      toast({
+        title: "Please try again",
+      });
+    }
+
+    navigate("/");
     console.log(values);
   }
 
@@ -66,44 +91,45 @@ const PostForm = ({ post }) => {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Add location</FormLabel>
+              <FormControl>
+                <Input className="shad-input rounded-[5px]" {...field} />
+              </FormControl>
+              <FormMessage className="shad-form_message" />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel>Add Tags(seperated by commas " , ")</FormLabel>
+              <FormControl>
+                <Input className="shad-input rounded-[5px]" {...field} />
+              </FormControl>
+              <FormMessage className="shad-form_message" />
+            </FormItem>
+          )}
+        />
+        <div className="flex gap-4 items-center justify-end w-full">
+          <Button
+            className="shad-button_dark_4 items-center rounded-[8px]"
+            type="button"
+            onClick={() => navigate("/")}
+          >
+            Cancel
+          </Button>
+          <Button className="shad-button_primary rounded-[8px]" type="submit">
+            Submit
+          </Button>
+        </div>
       </form>
-      <FormField
-        control={form.control}
-        name="location"
-        render={({ field }) => (
-          <FormItem className="w-full">
-            <FormLabel>Add location</FormLabel>
-            <FormControl>
-              <Input className="shad-input rounded-[5px]" {...field} />
-            </FormControl>
-            <FormMessage className="shad-form_message" />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="tags"
-        render={({ field }) => (
-          <FormItem className="w-full">
-            <FormLabel>Add Tags(seperated by commas " , ")</FormLabel>
-            <FormControl>
-              <Input className="shad-input rounded-[5px]" {...field} />
-            </FormControl>
-            <FormMessage className="shad-form_message" />
-          </FormItem>
-        )}
-      />
-      <div className="flex gap-4 items-center justify-end w-full">
-        <Button
-          className="shad-button_dark_4 items-center rounded-[8px]"
-          type="button"
-        >
-          Cancel
-        </Button>
-        <Button className="shad-button_primary rounded-[8px]" type="submit">
-          Create Post
-        </Button>
-      </div>
     </Form>
   );
 };

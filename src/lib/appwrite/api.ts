@@ -59,7 +59,6 @@ export const signInAccount = async (user: IsignInAccount) => {
         const session = await account.createEmailPasswordSession(user.email, user.password);
         return session;
     } catch (error) {
-        console.log(error);
         return error;
     };
 };
@@ -122,8 +121,12 @@ export const createPost = async (post: InewPost) => {
         if (!uploadedFile) throw Error;
 
         // Get file url
-        const fileUrl = await getFilePreviewFunc(uploadedFile.$id);
-        if (!fileUrl) throw Error;
+        const fileUrl = getFilePreview(uploadedFile.$id);
+        // If the file is corrupted then delete the file
+        if (!fileUrl) {
+            deleteFile(uploadedFile.$id);
+            throw Error;
+        };
 
         // Convert tags into array
         const tags = post.tags.replace(/ /g, "").split(",") || [];
@@ -137,11 +140,11 @@ export const createPost = async (post: InewPost) => {
                 creator: post.userId,
                 caption: post.caption,
                 location: post.location,
-                imageId: uploadedFile.$id,
                 imageUrl: fileUrl,
+                imageId: uploadedFile.$id,
                 tags: tags
             }
-        );
+        )
         if (!newPost) {
             await deleteFile(uploadedFile.$id);
             throw Error;
@@ -153,14 +156,14 @@ export const createPost = async (post: InewPost) => {
 };
 
 
-//Function to upload the file appwrite storage
+//Function to upload the file to appwrite storage
 export const uploadedFileFunc = async (file: File) => {
     try {
         const uploadedFile = await storage.createFile(
             appwriteConfig.storageId,
             ID.unique(),
-            file,
-        );
+            file
+        )
         return uploadedFile;
     } catch (error) {
         console.log(error);
@@ -169,15 +172,15 @@ export const uploadedFileFunc = async (file: File) => {
 
 
 //Function to get the file url
-export const getFilePreviewFunc =  (fileId: string) => {
+export const getFilePreview = (fileId: string) => {
     try {
         const fileUrl = storage.getFilePreview(
             appwriteConfig.storageId,
             fileId,
-            2000,
-            2000,
+            2000, //Width
+            2000, //Height
             ImageGravity.Top,
-            100
+            100 //Quality
         );
         if (!fileUrl) throw Error;
         return fileUrl;
@@ -186,14 +189,33 @@ export const getFilePreviewFunc =  (fileId: string) => {
     }
 };
 
+
 //Function to delete the file
-export const deleteFile = (fileId: string) => {
+export const deleteFile = async (fileId: string) => {
     try {
-        const deleteFileUrl = storage.deleteFile(
+        await storage.deleteFile(
             appwriteConfig.storageId,
             fileId
         );
-        return deleteFileUrl;
+        return { status: "OK" };
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+//Function to get all the posts
+export const getRecentPost = async () => {
+    try {
+        const recentPosts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            [
+                Query.orderDesc("$createdAt"), Query.limit(20)
+            ]
+        );
+        if (!recentPosts) throw Error;
+        return recentPosts;
     } catch (error) {
         console.log(error);
     }

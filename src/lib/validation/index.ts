@@ -17,7 +17,7 @@ export const SigninValidation = z.object({
 });
 
 
-export const FileUploaderValidation = z.object({
+export const PostValidation = z.object({
     caption: z.string().min(2, { message: "Minimum 2 characters" }).max(2200, { message: "Maximum 2200 characters" }),
     file: z.custom<File[]>(),
     location: z.string().min(1, { message: "Minimum 1 character" }).max(1000, { message: "Maximum 1000 characters" }),
