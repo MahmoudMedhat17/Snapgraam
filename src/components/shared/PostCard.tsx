@@ -63,7 +63,7 @@ const PostCard = ({ post }: IPost) => {
         {/* Update icon to update the post and check if it's the creator of the post or a random user */}
         <Link
           to={`/update-post/${post.$id}`}
-          className={`${user.id !== post.$id && "hidden"}`}
+          className={`${user.id !== post.creator.$id && "hidden"}`}
         >
           <img src="icons/edit.svg" alt="editIcon" width={20} height={20} />
         </Link>
