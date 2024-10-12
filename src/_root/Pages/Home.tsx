@@ -4,7 +4,7 @@ import { Models } from "appwrite";
 import PostCard from "@/components/shared/PostCard";
 
 const Home = () => {
-  const { data: posts, isLoading, isError } = useGetRecentPosts();
+  const { data: posts, isLoading } = useGetRecentPosts();
 
   return (
     <div className="flex flex-1">
@@ -16,7 +16,7 @@ const Home = () => {
           ) : (
             <>
               <ul className="flex flex-col flex-1 w-full gap-9">
-                {posts?.documents.map((post: Models.Document) => (
+                {posts?.map((post: Models.Document) => (
                   <PostCard post={post} />
                 ))}
               </ul>

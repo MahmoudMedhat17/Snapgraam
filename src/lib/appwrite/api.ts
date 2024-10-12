@@ -1,4 +1,4 @@
-import { InewPost, InewUser, IsaveUserToDB, IsignInAccount } from "@/types"
+import { IlikePost, InewPost, InewUser, IsavePost, IsaveUserToDB, IsignInAccount } from "@/types"
 import { account, databases, avatars, storage } from "./config";
 import { ID, ImageGravity, Query } from "appwrite";
 import { appwriteConfig } from "./config";
@@ -205,17 +205,76 @@ export const deleteFile = async (fileId: string) => {
 
 
 //Function to get all the posts
-export const getRecentPost = async () => {
+export const getRecentPosts = async () => {
     try {
         const recentPosts = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.postCollectionId,
             [
-                Query.orderDesc("$createdAt"), Query.limit(20)
+                Query.orderDesc("$createdAt"),
+                Query.limit(20)
             ]
         );
-        if (!recentPosts) throw Error;
-        return recentPosts;
+        if (!recentPosts || !recentPosts.documents.length) throw Error("No recent posts found!");
+        return recentPosts.documents;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+//Function to get update the like of the post
+export const likePost = async ({ postId, likesArray }: IlikePost) => {
+    try {
+        const likedPost = await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId,
+            {
+                likes: likesArray
+            }
+        );
+        if (!likePost) throw Error;
+
+        return likedPost;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+// Function to save the post
+export const savePost = async ({ postId, userId }: IsavePost) => {
+    try {
+        const savedPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.saveCollectionId,
+            ID.unique(),
+            {
+                post: postId,
+                user: userId
+            }
+        );
+
+        if (!savePost) throw Error;
+
+        return savedPost;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+// Function to delete the savedPost
+export const deletePost = async (savedPostId: string) => {
+    try {
+        const deletedPost = await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.saveCollectionId,
+            savedPostId
+        );
+        if (!deletedPost) throw Error;
+        return { status: "OK" };
     } catch (error) {
         console.log(error);
     }

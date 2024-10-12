@@ -47,3 +47,13 @@ export interface InewPost {
     location: string;
     tags: string;
 };
+
+export interface IlikePost {
+    postId: string;
+    likesArray: string[];
+};
+
+export interface IsavePost {
+    postId: string;
+    userId: string;
+};
