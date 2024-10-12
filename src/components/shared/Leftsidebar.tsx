@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useUserContext } from "@/context/AuthProvider";
 import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
 import { sidebarLinks } from "@/constants";
