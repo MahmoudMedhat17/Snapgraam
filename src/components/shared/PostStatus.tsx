@@ -1,8 +1,8 @@
 import {
   useLikePost,
   useSavePost,
-  useDeletePost,
   useGetCurrentUser,
+  useDeleteSavedPost,
 } from "@/lib/react-query/queriesAndMutations";
 import { checkIsLiked } from "@/lib/utils";
 import React, { useState, useEffect } from "react";
@@ -20,13 +20,13 @@ const PostStatus = ({ post, userId }: IpostStatusProps) => {
   const [savedPost, setSavedPost] = useState(false);
   const { mutate: likePost } = useLikePost();
   const { mutate: savePost, isPending: isSaved } = useSavePost();
-  const { mutate: deletePost, isPending: isDelete } = useDeletePost();
+  const { mutate: deleteSavedPost, isPending: isDelete } = useDeleteSavedPost();
   const { data: currentUser } = useGetCurrentUser();
 
   console.log(post);
 
-  const savedPostRecord = currentUser?.save.find(
-    (record: Models.Document) => record.post.$id === post.$id
+  const savedPostRecord = currentUser?.save.map(
+    (record: Models.Document) => record.$id === post.$id
   );
 
   useEffect(() => {
@@ -55,7 +55,7 @@ const PostStatus = ({ post, userId }: IpostStatusProps) => {
 
     if (savedPostRecord) {
       setSavedPost(false);
-      return deletePost(savedPostRecord);
+      return deleteSavedPost(savedPostRecord);
     } else {
       savePost({ postId: post.$id, userId: userId });
       setSavedPost(true);

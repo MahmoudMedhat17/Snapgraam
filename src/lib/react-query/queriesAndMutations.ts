@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { createNewUserAccount, signInAccount, signOutAccount, createPost, getRecentPosts, likePost, savePost, deletePost, getCurrentUser } from "../../lib/appwrite/api";
-import { IlikePost, InewPost, InewUser, IsavePost, IsignInAccount } from "@/types";
+import { createNewUserAccount, signInAccount, signOutAccount, createPost, getRecentPosts, likePost, savePost, getCurrentUser, deleteSavedPost, getPostsById, editPost, deleteEditedPost } from "../../lib/appwrite/api";
+import { IeditPost, IlikePost, InewPost, InewUser, IsavePost, IsignInAccount } from "@/types";
 import { QUERY_KEYS } from "./Querykeys";
 
 
@@ -75,11 +75,11 @@ export const useSavePost = () => {
 };
 
 
-export const useDeletePost = () => {
+export const useDeleteSavedPost = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (savedPostId: string) => deletePost(savedPostId),
+        mutationFn: (savedPostId: string) => deleteSavedPost(savedPostId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_RECENT_POSTS] });
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CURRENT_USER] });
@@ -94,5 +94,39 @@ export const useGetCurrentUser = () => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_CURRENT_USER],
         queryFn: getCurrentUser
+    })
+};
+
+
+// Function to get the post by id
+export const useGetPostById = (postId: string) => {
+    return useQuery({
+        queryFn: () => getPostsById(postId),
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, postId],
+        enabled: !!postId
+    })
+};
+
+
+export const useEditPost = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (post: IeditPost) => editPost(post),
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id] });
+        }
+    })
+};
+
+
+export const useDeletePost = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ postId, imageId }: { postId: string, imageId: string }) => deleteEditedPost(postId, imageId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_RECENT_POSTS] });
+        }
     })
 };

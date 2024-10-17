@@ -1,4 +1,4 @@
-import { IlikePost, InewPost, InewUser, IsavePost, IsaveUserToDB, IsignInAccount } from "@/types"
+import { IlikePost, InewPost, InewUser, IsavePost, IsaveUserToDB, IsignInAccount, IeditPost } from "@/types"
 import { account, databases, avatars, storage } from "./config";
 import { ID, ImageGravity, Query } from "appwrite";
 import { appwriteConfig } from "./config";
@@ -110,7 +110,6 @@ export const getCurrentUser = async () => {
 };
 
 
-
 // POSTS
 
 //Function to create a post and save it to appwrite
@@ -124,7 +123,7 @@ export const createPost = async (post: InewPost) => {
         const fileUrl = getFilePreview(uploadedFile.$id);
         // If the file is corrupted then delete the file
         if (!fileUrl) {
-            deleteFile(uploadedFile.$id);
+            await deleteFile(uploadedFile.$id);
             throw Error;
         };
 
@@ -266,7 +265,7 @@ export const savePost = async ({ postId, userId }: IsavePost) => {
 
 
 // Function to delete the savedPost
-export const deletePost = async (savedPostId: string) => {
+export const deleteSavedPost = async (savedPostId: string) => {
     try {
         const deletedPost = await databases.deleteDocument(
             appwriteConfig.databaseId,
@@ -275,6 +274,98 @@ export const deletePost = async (savedPostId: string) => {
         );
         if (!deletedPost) throw Error;
         return { status: "OK" };
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+// Function to Edit the post
+export const editPost = async (post: IeditPost) => {
+
+    const hasFileUpdated = post.file.length > 0;
+
+    try {
+
+        let image = {
+            imageId: post.imageId,
+            imageUrl: post.imageUrl
+        };
+
+        if (hasFileUpdated) {
+            // Upload file to appwrite storage
+            const uploadedFile = await uploadedFileFunc(post.file[0]);
+            if (!uploadedFile) throw Error;
+
+            // Get file url
+            const fileUrl = getFilePreview(uploadedFile.$id);
+            // If the file is corrupted then delete the file
+            if (!fileUrl) {
+                await deleteFile(uploadedFile.$id);
+                throw Error;
+            };
+
+
+            image = { ...image, imageId: uploadedFile.$id, imageUrl: fileUrl };
+
+            // Convert tags into array
+            const tags = post.tags.replace(/ /g, "").split(",") || [];
+
+            // Create post
+            const editedPost = await databases.updateDocument(
+                appwriteConfig.databaseId,
+                appwriteConfig.postCollectionId,
+                post.postId,
+                {
+                    caption: post.caption,
+                    location: post.location,
+                    imageUrl: image.imageUrl,
+                    imageId: image.imageId,
+                    tags: tags
+                }
+            )
+            if (!editedPost) {
+                await deleteFile(uploadedFile.$id);
+                throw Error;
+            };
+            return editedPost;
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+//Function to delete the edit of the post
+export const deleteEditedPost = async (postId: string, imageId: string) => {
+
+    if (!postId || !imageId) throw Error;
+
+    try {
+        const status = await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId
+        );
+
+        if (!status) throw Error;
+
+        return { status: "ok" };
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+// Function to get the post by ID
+export const getPostsById = async (postId: string) => {
+    try {
+        const post = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            postId
+        );
+        if (!post) throw Error;
+        return post;
     } catch (error) {
         console.log(error);
     }

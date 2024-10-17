@@ -8,7 +8,7 @@ const CreatePost = () => {
           <img src="icons/add-post.svg" alt="createPost" />
           <p className="h3-bold md:h2-bold">Create Post</p>
         </div>
-        <PostForm />
+        <PostForm action="Create" />
       </div>
     </div>
   );

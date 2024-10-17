@@ -40,6 +40,7 @@ export interface IcontextType {
     checkUserAuth: () => Promise<boolean>,
 };
 
+
 export interface InewPost {
     userId: string;
     caption: string;
@@ -47,6 +48,18 @@ export interface InewPost {
     location: string;
     tags: string;
 };
+
+
+export interface IeditPost {
+    postId: string;
+    imageId: string;
+    imageUrl: URL;
+    caption: string;
+    file: File[];
+    location: string;
+    tags: string;
+};
+
 
 export interface IlikePost {
     postId: string;

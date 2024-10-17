@@ -13,7 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import FileUploader from "../shared/FileUploader";
 import { PostValidation } from "@/lib/validation";
-import { useCreatePost } from "@/lib/react-query/queriesAndMutations";
+import {
+  useCreatePost,
+  useEditPost,
+} from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -21,10 +24,12 @@ import { Models } from "appwrite";
 
 interface PostFormProps {
   post?: Models.Document;
+  action: "Create" | "Update";
 }
 
-const PostForm = ({ post }: PostFormProps) => {
-  const { mutateAsync: createPost } = useCreatePost();
+const PostForm = ({ post, action }: PostFormProps) => {
+  const { mutateAsync: createPost, isPending: isLoading } = useCreatePost();
+  const { mutateAsync: editPost, isPending: isEdited } = useEditPost();
   const { user } = useUserContext();
   const navigate = useNavigate();
 
@@ -41,6 +46,25 @@ const PostForm = ({ post }: PostFormProps) => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof PostValidation>) {
+    //Update post
+    if (post && action === "Update") {
+      const editedPost = await editPost({
+        ...values,
+        postId: post.$id,
+        imageId: post.imageId,
+        imageUrl: post.imageUrl,
+      });
+
+      if (!editedPost) {
+        toast({
+          title: "Please try again",
+        });
+      }
+
+      return navigate(`/posts/${post.$id}`);
+    }
+
+    //Create post
     const newPost = await createPost({
       ...values,
       userId: user.id,
@@ -53,7 +77,6 @@ const PostForm = ({ post }: PostFormProps) => {
     }
 
     navigate("/");
-    console.log(values);
   }
 
   return (
@@ -125,8 +148,12 @@ const PostForm = ({ post }: PostFormProps) => {
           >
             Cancel
           </Button>
-          <Button className="shad-button_primary rounded-[8px]" type="submit">
-            Submit
+          <Button
+            className="shad-button_primary rounded-[8px]"
+            type="submit"
+            disabled={isLoading || isEdited}
+          >
+            {action === "Update" ? "Update" : "Create"}
           </Button>
         </div>
       </form>
