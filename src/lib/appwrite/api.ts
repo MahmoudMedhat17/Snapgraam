@@ -311,7 +311,7 @@ export const editPost = async (post: IeditPost) => {
             // Convert tags into array
             const tags = post.tags.replace(/ /g, "").split(",") || [];
 
-            // Create post
+            // Edit post
             const editedPost = await databases.updateDocument(
                 appwriteConfig.databaseId,
                 appwriteConfig.postCollectionId,
@@ -334,6 +334,7 @@ export const editPost = async (post: IeditPost) => {
         console.log(error);
     }
 };
+
 
 //Function to delete the edit of the post
 export const deleteEditedPost = async (postId: string, imageId: string) => {
@@ -366,6 +367,49 @@ export const getPostsById = async (postId: string) => {
         );
         if (!post) throw Error;
         return post;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+//Function to get infinite posts
+export const getAllInfinitePosts = async ({ pageParam }: { pageParam: number }) => {
+
+    const queries: string[] = [Query.orderDesc("$updateAt"), Query.limit(10)];
+
+    if (pageParam) {
+        queries.push(Query.cursorAfter(pageParam.toString()));
+    }
+
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            queries
+        );
+
+        if (!posts) throw Error;
+
+        return posts;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+//Function for searching for posts
+export const searchPosts = async (searchPost: string) => {
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            [Query.search("caption", searchPost)]
+        );
+
+        if (!posts) throw Error;
+
+        return posts;
     } catch (error) {
         console.log(error);
     }

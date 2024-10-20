@@ -15,7 +15,7 @@ interface IpostStatusProps {
 }
 
 const PostStatus = ({ post, userId }: IpostStatusProps) => {
-  const likesArray = post.likes.map((user: Models.Document) => user.$id);
+  const likesArray = post?.likes.map((user: Models.Document) => user.$id);
   const [likes, setLikes] = useState(likesArray);
   const [savedPost, setSavedPost] = useState(false);
   const { mutate: likePost } = useLikePost();
@@ -26,7 +26,7 @@ const PostStatus = ({ post, userId }: IpostStatusProps) => {
   console.log(post);
 
   const savedPostRecord = currentUser?.save.map(
-    (record: Models.Document) => record.$id === post.$id
+    (record: Models.Document) => record.$id === post?.$id
   );
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const PostStatus = ({ post, userId }: IpostStatusProps) => {
     }
 
     setLikes(newLikesArray);
-    likePost({ postId: post.$id, likesArray: newLikesArray });
+    likePost({ postId: post?.$id || "", likesArray: newLikesArray });
   };
 
   const handleSavedPosts = (e: React.MouseEvent) => {
@@ -57,7 +57,7 @@ const PostStatus = ({ post, userId }: IpostStatusProps) => {
       setSavedPost(false);
       return deleteSavedPost(savedPostRecord);
     } else {
-      savePost({ postId: post.$id, userId: userId });
+      savePost({ postId: post?.$id || "", userId: userId });
       setSavedPost(true);
     }
   };
@@ -67,7 +67,7 @@ const PostStatus = ({ post, userId }: IpostStatusProps) => {
       <div className="flex gap-2 mr-5">
         <img
           src={
-            checkIsLiked(userId, likes) ? "icons/liked.svg" : "icons/like.svg"
+            checkIsLiked(userId, likes) ? "/icons/liked.svg" : "/icons/like.svg"
           }
           alt="like"
           width={20}
@@ -82,7 +82,7 @@ const PostStatus = ({ post, userId }: IpostStatusProps) => {
           <Loader />
         ) : (
           <img
-            src={savedPost ? "icons/saved.svg" : "icons/save.svg"}
+            src={savedPost ? "/icons/saved.svg" : "/icons/save.svg"}
             alt="save"
             width={20}
             height={20}
