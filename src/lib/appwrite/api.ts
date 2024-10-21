@@ -376,7 +376,7 @@ export const getPostsById = async (postId: string) => {
 //Function to get infinite posts
 export const getAllInfinitePosts = async ({ pageParam }: { pageParam: number }) => {
 
-    const queries: string[] = [Query.orderDesc("$updateAt"), Query.limit(10)];
+    const queries: string[] = [Query.orderDesc("$updatedAt"), Query.limit(10)];
 
     if (pageParam) {
         queries.push(Query.cursorAfter(pageParam.toString()));

@@ -23,7 +23,6 @@ const PostStatus = ({ post, userId }: IpostStatusProps) => {
   const { mutate: deleteSavedPost, isPending: isDelete } = useDeleteSavedPost();
   const { data: currentUser } = useGetCurrentUser();
 
-  console.log(post);
 
   const savedPostRecord = currentUser?.save.map(
     (record: Models.Document) => record.$id === post?.$id
