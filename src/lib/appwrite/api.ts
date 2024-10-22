@@ -365,7 +365,9 @@ export const getPostsById = async (postId: string) => {
             appwriteConfig.postCollectionId,
             postId
         );
+
         if (!post) throw Error;
+
         return post;
     } catch (error) {
         console.log(error);
@@ -410,6 +412,30 @@ export const searchPosts = async (searchPost: string) => {
         if (!posts) throw Error;
 
         return posts;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+//Function to get all users
+export const getAllUsers = async (limit?: number) => {
+    const queries: string[] = [Query.orderDesc("$createdAt")];
+
+    if (limit) {
+        queries.push(Query.limit(limit));
+    };
+
+    try {
+        const users = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            queries
+        );
+
+        if (!users) throw Error;
+
+        return users;
     } catch (error) {
         console.log(error);
     }
