@@ -74,8 +74,6 @@ const Signup = () => {
           title: "Sign in failed, please try again",
         });
       }
-
-      console.log(newUser);
     } catch (error) {
       console.log(error);
     }

@@ -55,7 +55,6 @@ const Signin = () => {
       console.log(error);
       return error;
     }
-    console.log(users);
   }
 
   return (

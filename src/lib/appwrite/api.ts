@@ -440,3 +440,27 @@ export const getAllUsers = async (limit?: number) => {
         console.log(error);
     }
 };
+
+
+//Function that get the user by ID
+export const getUserById = async (userId: string) => {
+    try {
+        const user = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.userCollectionId,
+            userId
+        );
+
+        if (!user) throw Error;
+
+        return user;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+// Function to update the user
+export const updateUser = async()=>{
+
+};

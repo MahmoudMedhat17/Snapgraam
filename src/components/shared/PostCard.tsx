@@ -35,7 +35,6 @@ const PostCard = ({ post }: IPost) => {
   //   hour12: true,
   // });
 
-
   return (
     <div className="post-card">
       <div className="flex-between">

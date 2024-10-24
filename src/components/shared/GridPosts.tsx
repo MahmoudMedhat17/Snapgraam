@@ -28,10 +28,12 @@ const GridPosts = ({
             {showUser && (
               <div className="flex items-center justify-start gap-2 flex-1">
                 <img
-                  src={post.creator.imageUrl || "icons/profile-placeholder.svg"}
+                  src={
+                    post?.creator?.imageUrl || "icons/profile-placeholder.svg"
+                  }
                   className="w-8 h-8 rounded-full"
                 />
-                <p className="line-clamp-1">{post.creator.userName}</p>
+                <p className="line-clamp-1">{post?.creator?.userName}</p>
               </div>
             )}
 
