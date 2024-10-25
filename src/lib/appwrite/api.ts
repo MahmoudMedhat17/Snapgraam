@@ -1,4 +1,4 @@
-import { IlikePost, InewPost, InewUser, IsavePost, IsaveUserToDB, IsignInAccount, IeditPost } from "@/types"
+import { IlikePost, InewPost, InewUser, IsavePost, IsaveUserToDB, IsignInAccount, IeditPost, IupdateUser } from "@/types"
 import { account, databases, avatars, storage } from "./config";
 import { ID, ImageGravity, Query } from "appwrite";
 import { appwriteConfig } from "./config";
@@ -461,6 +461,60 @@ export const getUserById = async (userId: string) => {
 
 
 // Function to update the user
-export const updateUser = async()=>{
+export const updateUser = async (user: IupdateUser) => {
+    const hasFileUpdate = user.file.length > 0;
 
+    try {
+        let image = {
+            imageId: user.imageId,
+            imageUrl: user.imageUrl
+        };
+
+        if (hasFileUpdate) {
+            const uploadedFile = await uploadedFileFunc(user.file[0]);
+            if (!uploadedFile) throw Error;
+
+            const fileUrl = getFilePreview(uploadedFile.$id);
+            if (!fileUrl) {
+                await deleteFile(uploadedFile.$id);
+                throw Error;
+            };
+
+            image = { ...image, imageId: uploadedFile.$id, imageUrl: fileUrl };
+        }
+
+        const updatedUser = await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.userCollectionId,
+            user.userId,
+            {
+                name: user.name,
+                bio: user.bio,
+                imageId: image.imageId,
+                imageUrl: image.imageUrl
+            },
+        )
+
+        // Failed to update
+        if (!updatedUser) {
+
+            // Delete new file that has been recently uploaded
+            if (hasFileUpdate) {
+                await deleteFile(image.imageId);
+            }
+
+            // If no new file uploaded, just throw error
+            throw Error;
+        };
+
+
+        // Safely delete old file after successful update
+        if (user.imageId && hasFileUpdate) {
+            await deleteFile(user.imageId);
+        };
+
+        return updatedUser;
+    } catch (error) {
+        console.log(error);
+    }
 };

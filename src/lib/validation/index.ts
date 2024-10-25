@@ -23,3 +23,5 @@ export const PostValidation = z.object({
     location: z.string().min(1, { message: "Minimum 1 character" }).max(1000, { message: "Maximum 1000 characters" }),
     tags: z.string()
 });
+
+

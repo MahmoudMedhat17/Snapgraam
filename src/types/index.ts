@@ -70,3 +70,13 @@ export interface IsavePost {
     postId: string;
     userId: string;
 };
+
+
+export interface IupdateUser {
+    userId: string;
+    name: string;
+    bio: string;
+    imageId: string;
+    imageUrl: URL | string;
+    file: File[];
+};
