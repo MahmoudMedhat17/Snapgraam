@@ -25,3 +25,10 @@ export const PostValidation = z.object({
 });
 
 
+export const ProfileUploadValidation = z.object({
+    name: z.string().min(2, { message: "name must be at least 2 characters" }),
+    userName: z.string().min(2, { message: "name must be at least 2 characters" }),
+    email: z.string().email(),
+    bio: z.string(),
+    file: z.custom<File[]>()
+});

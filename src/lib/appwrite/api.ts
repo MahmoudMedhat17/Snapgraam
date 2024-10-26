@@ -486,7 +486,7 @@ export const updateUser = async (user: IupdateUser) => {
         const updatedUser = await databases.updateDocument(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
-            user.userId,
+            user?.userId,
             {
                 name: user.name,
                 bio: user.bio,
@@ -514,6 +514,26 @@ export const updateUser = async (user: IupdateUser) => {
         };
 
         return updatedUser;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+
+export const topCreators = async () => {
+
+    const queries = [Query.orderDesc("$createdAt")];
+
+    try {
+        const users = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.userCollectionId,
+            queries
+        );
+
+        if (!users) throw Error;
+
+        return users;
     } catch (error) {
         console.log(error);
     }

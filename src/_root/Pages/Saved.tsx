@@ -15,8 +15,6 @@ const Saved = () => {
     };
   });
 
-  console.log(posts);
-
   return (
     <div className="saved-container">
       <div className="w-full flex items-center gap-3">

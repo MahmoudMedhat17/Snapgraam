@@ -12,8 +12,6 @@ const Profile = () => {
   const { data: currentUser } = useGetUserById(id || "");
   const { user } = useUserContext();
 
-  console.log(currentUser);
-
   return (
     <>
       {!currentUser ? (
@@ -43,7 +41,12 @@ const Profile = () => {
                 className={`${user.id !== currentUser.$id && "hidden"}`}
               >
                 <div className="flex items-center bg-dark-4 px-4 rounded-xl">
-                  <img src="/icons/edit.svg" width={20} height={20} />
+                  <img
+                    src="/icons/edit.svg"
+                    width={20}
+                    height={20}
+                    className="invert-white"
+                  />
                   <Button className="flex whitespace-nowrap small-medium">
                     Edit Profile
                   </Button>
