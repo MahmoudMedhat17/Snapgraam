@@ -5,7 +5,6 @@ import { Loader } from "lucide-react";
 const AllUsers = () => {
   const { data: getAllUsers } = useGetAllUsers();
 
-
   return (
     <div className="user-container">
       <div className="flex items-center gap-3">
@@ -24,11 +23,11 @@ const AllUsers = () => {
               className="flex flex-col items-center space-y-2 border-dark-2 border-2 p-6 rounded-2xl"
             >
               <img
-                src={user.creator.imageUrl}
+                src={user.creator?.imageUrl}
                 className="w-14 h-14 rounded-full"
               />
-              <p>{user.creator.userName}</p>
-              <p className="text-light-4 text-xs">@{user.creator.userName}</p>
+              <p>{user.creator?.userName}</p>
+              <p className="text-light-4 text-xs">@{user.creator?.userName}</p>
               <Button className="bg-primary-600 hover:bg-primary-500 px-8 py-2 rounded-xl">
                 Follow
               </Button>

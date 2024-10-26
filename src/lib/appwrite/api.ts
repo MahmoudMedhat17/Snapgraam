@@ -521,14 +521,11 @@ export const updateUser = async (user: IupdateUser) => {
 
 
 export const topCreators = async () => {
-
-    const queries = [Query.orderDesc("$createdAt")];
-
     try {
         const users = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
-            queries
+            [Query.orderDesc("$createdAt")]
         );
 
         if (!users) throw Error;

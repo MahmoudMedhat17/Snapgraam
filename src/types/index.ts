@@ -73,7 +73,7 @@ export interface IsavePost {
 
 
 export interface IupdateUser {
-    userId: string | undefined;
+    userId: string;
     name: string;
     bio: string;
     imageId: string;

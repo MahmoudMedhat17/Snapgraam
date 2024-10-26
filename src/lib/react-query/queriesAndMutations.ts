@@ -194,6 +194,6 @@ export const useGetUpdateUser = () => {
 export const useTopCreators = () => {
     return useQuery({
         queryKey: [QUERY_KEYS.GET_USERS],
-        queryFn: topCreators
+        queryFn: topCreators,
     })
 };
