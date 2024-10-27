@@ -66,6 +66,7 @@ export interface IlikePost {
     likesArray: string[];
 };
 
+
 export interface IsavePost {
     postId: string;
     userId: string;
@@ -73,7 +74,7 @@ export interface IsavePost {
 
 
 export interface IupdateUser {
-    userId: string;
+    userId: string | undefined;
     name: string;
     bio: string;
     imageId: string;

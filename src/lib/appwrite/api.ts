@@ -486,7 +486,7 @@ export const updateUser = async (user: IupdateUser) => {
         const updatedUser = await databases.updateDocument(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
-            user?.userId,
+            user.userId!,
             {
                 name: user.name,
                 bio: user.bio,

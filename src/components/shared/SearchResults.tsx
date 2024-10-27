@@ -1,9 +1,8 @@
-import { Models } from "appwrite";
 import Loader from "./Loader";
 import GridPosts from "./GridPosts";
 
 type SearchResultsProps = {
-  searchedPosts: Models.Document[] | [];
+  searchedPosts: any;
   isSearchFetching: boolean;
 };
 

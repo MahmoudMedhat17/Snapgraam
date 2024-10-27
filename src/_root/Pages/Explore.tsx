@@ -39,8 +39,6 @@ const Explore = () => {
       (item) => item && item.documents && item.documents.length === 0
     );
 
-  // console.log(posts);
-
   return (
     <div className="explore-container">
       <div className="explore-inner_container">
